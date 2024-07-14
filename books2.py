@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import FastAPI
+from fastapi import FastAPI, Path, Query
 from pydantic import BaseModel, Field
 from starlette import status
 
@@ -64,14 +64,14 @@ async def read_all_books():
 
 
 @app.get("/books/{book_id}")
-async def read_book(book_id: int):
+async def read_book(book_id: int = Path(gt=0)):
     for book in BOOKS:
         if book.id == book_id:
             return book
 
 
 @app.get("/books/")
-async def filter_book_by_rating(rating: int):
+async def filter_book_by_rating(rating: int = Query(gt=0, lt=6)):
     filtered_books = []
     for book in BOOKS:
         if book.rating == rating:
@@ -80,7 +80,7 @@ async def filter_book_by_rating(rating: int):
 
 
 @app.get("/books/published/")
-async def read_books_by_publish_date(published_date: int):
+async def read_books_by_publish_date(published_date: int = Query(gt=1999, lt=2031)):
     books_to_return = []
     for book in BOOKS:
         if book.published_date == published_date:
@@ -108,8 +108,8 @@ async def update_book(book_request: BookRequest):
             BOOKS[i] = book_request
 
 
-@app.delete("/books/{delete_id}")
-async def delete_book(book_id: int):
+@app.delete("/books/{book_id}")
+async def delete_book(book_id: int = Path(gt=0)):
     for i in range(len(BOOKS)):
         if BOOKS[i].id == book_id:
             BOOKS.pop(i)
